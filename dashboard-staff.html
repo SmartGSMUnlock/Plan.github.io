@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AL - Staff Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</head>
+
+<body class="min-h-screen flex flex-col">
+  <!-- LOGIN SECTION -->
+  <div id="loginSection" class="fixed inset-0 z-[200] bg-slate-900 flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center text-slate-900">
+      <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+        <i data-lucide="smartphone" class="w-10 h-10 text-white"></i>
+      </div>
+      <h2 class="text-2xl font-bold">Staff Login</h2>
+      <p class="text-slate-500 mb-6 text-sm">AL - Gadget Repair Shop</p>
+      <div class="space-y-4">
+        <input type="email" id="logEmail" placeholder="Email" autocomplete="off" style="text-transform: none!important;" class="w-full p-3 rounded-lg border border-slate-200 outline-none">
+        <input type="password" id="logPass" placeholder="Password" autocomplete="off" style="text-transform: none!important;" class="w-full p-3 rounded-lg border border-slate-200 outline-none">
+        <button id="loginBtn" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700">Sign In</button>
+        <p id="logError" class="text-red-500 text-xs hidden">Invalid credentials</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD SECTION -->
+  <div id="dashboardSection" class="hidden flex h-screen overflow-hidden">
+    <!-- SIDEBAR -->
+    <div class="sidebar w-64 flex-shrink-0 hidden md:block">
+      <div class="p-6 border-b border-slate-800 flex items-center gap-3">
+        <img id="sidebarShopIcon" src="" class="w-10 h-10 rounded-lg bg-input object-cover" style="display:none;">
+        <div>
+          <h1 class="text-xl font-bold text-white mb-0" id="shopNameDisplay">Loading...</h1>
+          <p class="text-xs text-slate-400">Staff Panel</p>
+        </div>
+      </div>
+      <nav class="px-3 py-4">
+        <button class="sidebar-item w-full text-left px-4 py-3 rounded-lg mb-1 flex items-center gap-3 active" data-tab="sales">
+          <i data-lucide="shopping-cart" class="w-5 h-5"></i> Accessories
+        </button>
+        <button class="sidebar-item w-full text-left px-4 py-3 rounded-lg mb-1 flex items-center gap-3" data-tab="repair">
+          <i data-lucide="wrench" class="w-5 h-5"></i> Repairs
+        </button>
+        <button class="sidebar-item w-full text-left px-4 py-3 rounded-lg mb-1 flex items-center gap-3" data-tab="expense">
+          <i data-lucide="receipt" class="w-5 h-5"></i> Expenses
+        </button>
+        <button class="sidebar-item w-full text-left px-4 py-3 rounded-lg mb-1 flex items-center gap-3" data-tab="history">
+          <i data-lucide="history" class="w-5 h-5"></i> Transaction History
+        </button>
+      </nav>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 overflow-y-auto">
+      <!-- HEADER + 4 CARDS - ALWAYS VISIBLE -->
+      <div class="bg-card border-b border-theme p-4 sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto">
+          <!-- Mobile Header -->
+          <div class="flex justify-between items-center mb-4 md:hidden">
+            <button id="mobileMenuBtn" class="p-2">
+              <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+            <h2 class="text-lg font-bold" id="mobileTitle">Accessories</h2>
+            <button id="logoutBtnMobile" class="p-2 text-red-400">
+              <i data-lucide="log-out" class="w-5 h-5"></i>
+            </button>
+          </div>
+
+          <!-- Desktop Header -->
+          <div class="hidden md:flex justify-between items-center mb-4">
+            <div>
+              <h2 class="text-xl font-bold"><span class="text-blue-500">Staff</span> Dashboard</h2>
+              <p class="text-xs text-sub" id="staffNameDisplay"></p>
+            </div>
+            <div class="flex items-center gap-3">
+              <button id="darkModeToggle" class="p-2 rounded bg-input border-theme">
+                <i data-lucide="sun" class="w-5 h-5 light-icon"></i>
+                <i data-lucide="moon" class="w-5 h-5 dark-icon hidden"></i>
+              </button>
+              <button id="logoutBtn" class="p-2 rounded bg-input border border-theme text-red-400">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 STATS CARDS - NAG-UUPDATE BASE SA HISTORY DATE -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="bg-input p-3 rounded-lg border border-theme border-l-4 border-l-green-500">
+              <div class="text-sub text-xs uppercase mb-1">Net Revenue</div>
+              <div id="totalRevenue" class="text-lg md:text-xl font-bold text-green-400">₱0.00</div>
+            </div>
+            <div class="bg-input p-3 rounded-lg border border-theme border-l-4 border-l-red-500">
+              <div class="text-sub text-xs uppercase mb-1">Expenses</div>
+              <div id="totalExpenses" class="text-lg md:text-xl font-bold text-red-400">₱0.00</div>
+            </div>
+            <div class="bg-input p-3 rounded-lg border border-theme">
+              <div class="text-sub text-xs uppercase mb-1">Sales Count</div>
+              <div id="salesCount" class="text-lg md:text-xl font-bold text-main">0</div>
+            </div>
+            <div class="bg-input p-3 rounded-lg border border-theme">
+              <div class="text-sub text-xs uppercase mb-1">Repairs Count</div>
+              <div id="repairCount" class="text-lg md:text-xl font-bold text-main">0</div>
+            </div>
+          </div>
+          <div class="text-xs text-sub mt-2" id="showingDateText">Showing: Today</div>
+        </div>
+      </div>
+
+      <!-- CONTENT AREA -->
+      <div class="max-w-7xl mx-auto p-4">
+        <!-- SALES TAB -->
+        <div id="salesContent" class="tab-content active">
+          <form id="salesForm" class="bg-card rounded-xl border border-theme p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Date</label>
+                <input type="date" id="salesDate" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Item Name</label>
+                <input type="text" id="salesItem" placeholder="E.G. Bisen Charger Type C" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Brand</label>
+                <input type="text" id="salesBrand" placeholder="E.G. Samsung" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Model / Variant</label>
+                <input type="text" id="salesModel" placeholder="E.G. Type C, Micro, IOS" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Quantity</label>
+                <input type="number" id="salesQty" value="1" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Capital Cost</label>
+                <input type="number" id="salesCapital" placeholder="0.00" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Selling Price</label>
+                <input type="number" id="salesPrice" placeholder="0.00" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Status</label>
+                <select id="saleStatus" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+                  <option value="Completed">Sold</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Reserved">Reserved</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Warranty</label>
+                <select id="saleWarranty" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+                  <option value="No Warranty">No Warranty</option>
+                  <option value="3 Days">3 Days Warranty</option>
+                  <option value="7 Days">7 Days Warranty</option>
+                  <option value="15 Days">15 Days Warranty</option>
+                  <option value="30 Days">30 Days Warranty</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 mt-6">
+              <i data-lucide="plus-circle" class="w-5 h-5"></i> Record Sale
+            </button>
+          </form>
+        </div>
+
+        <!-- REPAIR TAB -->
+        <div id="repairContent" class="tab-content">
+          <form id="repairForm" class="bg-card rounded-xl border border-theme p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Date</label>
+                <input type="date" id="repairDate" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Customer Name</label>
+                <input type="text" id="repairCustomer" placeholder="Enter Name" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Status</label>
+                <select id="repairStatus" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+                  <option value="Pending">Pending</option>
+                  <option value="Done">Done</option>
+                  <option value="Return to Owner">Return to Owner</option>
+                </select>
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Brand</label>
+                <input type="text" id="repairBrand" placeholder="E.G. Apple" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Model</label>
+                <input type="text" id="repairModel" placeholder="E.G. iPhone 13" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Issue / Job</label>
+                <input type="text" id="repairIssue" placeholder="LCD Replacement, Etc." class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Parts Capital</label>
+                <input type="number" id="repairCapital" placeholder="0.00" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Service Price</label>
+                <input type="number" id="repairPrice" placeholder="0.00" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Warranty</label>
+                <select id="repairWarranty" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+                  <option value="No Warranty">No Warranty</option>
+                  <option value="3 Days">3 Days Warranty</option>
+                  <option value="7 Days">7 Days Warranty</option>
+                  <option value="15 Days">15 Days Warranty</option>
+                  <option value="30 Days">30 Days Warranty</option>
+                </select>
+              </div>
+            <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 mt-6">
+              <i data-lucide="wrench" class="w-5 h-5"></i> Record Repair
+            </button>
+          </form>
+        </div>
+
+        <!-- EXPENSE TAB -->
+        <div id="expenseContent" class="tab-content">
+          <form id="expenseForm" class="bg-card rounded-xl border border-theme p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Date</label>
+                <input type="date" id="expDate" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] uppercase font-bold text-sub">Amount</label>
+                <input type="number" id="expAmount" placeholder="0.00" class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+              </div>
+            </div>
+            <div class="space-y-1 mt-4">
+              <label class="text-[10px] uppercase font-bold text-sub">Reason / Description</label>
+              <input type="text" id="expReason" placeholder="Food, Rent, Electricity, Etc." class="w-full px-3 py-2 rounded-lg bg-input border border-theme text-main">
+            </div>
+            <button type="submit" class="w-full bg-red-500 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-red-600 transition-all mt-6">
+              <i data-lucide="minus-circle" class="w-5 h-5"></i> Record Expense
+            </button>
+          </form>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div id="historyContent" class="tab-content">
+          <div class="bg-card rounded-xl border border-theme overflow-hidden">
+            <div class="flex flex-col md:flex-row gap-2 p-4 border-b border-theme items-center">
+              <select id="historyViewType" class="px-3 py-2 rounded-lg bg-input border border-theme text-sm font-bold">
+                <option value="daily">Daily</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+              <div class="flex items-center gap-2 bg-input px-3 py-2 rounded-lg border border-theme w-full md:w-auto" id="historyDailyPicker">
+                <i data-lucide="calendar" class="w-4 h-4 text-sub"></i>
+                <input type="date" id="historyFilterDate" class="bg-transparent outline-none text-sm text-main">
+              </div>
+              <div class="flex items-center gap-2 bg-input px-3 py-2 rounded-lg border border-theme w-full md:w-auto hidden" id="historyMonthlyPicker">
+                <i data-lucide="calendar" class="w-4 h-4 text-sub"></i>
+                <input type="month" id="historyFilterMonth" class="bg-transparent outline-none text-sm text-main">
+              </div>
+              <div class="flex items-center gap-2 bg-input px-3 py-2 rounded-lg border border-theme w-full md:w-auto hidden" id="historyYearlyPicker">
+                <i data-lucide="calendar" class="w-4 h-4 text-sub"></i>
+                <input type="number" id="historyFilterYear" placeholder="2026" min="2020" max="2030" class="bg-transparent outline-none text-sm text-main w-20">
+              </div>
+              <select id="filterType" class="px-3 py-2 rounded-lg bg-input border border-theme text-sm w-full md:w-auto">
+                <option value="all">All Logs</option>
+                <option value="sale">Sales</option>
+                <option value="repair">Repairs</option>
+                <option value="expense">Expenses</option>
+              </select>
+              <select id="filterStatus" class="px-3 py-2 rounded-lg bg-input border border-theme text-sm w-full md:w-auto">
+                <option value="all">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Done">Done</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+                <option value="Return to Owner">Return</option>
+                <option value="Reserved">Reserved</option>
+              </select>
+              <div class="relative flex-1 w-full min-w-[200px]">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-sub"></i>
+                <input type="text" id="searchHistory" placeholder="Search customer, model, brand..." class="normal-case w-full pl-10 pr-4 py-2 rounded-lg bg-input border border-theme text-sm">
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead class="bg-input text-[10px] uppercase text-sub font-bold">
+                  <tr>
+                    <th class="px-4 py-4">Type</th>
+                    <th class="px-4 py-4">Complete Details</th>
+                    <th class="px-4 py-4">Date/Time</th>
+                    <th class="px-4 py-4 text-right">Value/Profit</th>
+                  </tr>
+                </thead>
+                <tbody id="historyTableBody" class="divide-y divide-theme"></tbody>
+              </table>
+              <div id="emptyHistory" class="hidden p-12 text-center text-sub">No records found.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="mt-12 py-6 border-t border-theme bg-card">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+          <p class="text-xs text-sub">AL - Gadget Repair Shop Management System</p>
+          <p class="text-[10px] text-sub mt-1">Version 8.4.1 | © 2026 All Rights Reserved</p>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+<script>
+  // App version and Firebase configuration
+  const APP_VERSION = "3.2.2";
+  const firebaseConfig = {
+    apiKey: "AIzaSyA1ip_tRmQbF95YSTeQhjGK3ZdiUKH3L64",
+    authDomain: "salesinventory-c83d2.firebaseapp.com",
+    databaseURL: "https://salesinventory-c83d2-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "salesinventory-c83d2",
+    storageBucket: "salesinventory-c83d2.appspot.com",
+    appId: "1:940789827247:web:37a53abfaeb3a8495cb65a"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+  const storage = firebase.storage();
+  const usersRef = db.ref('smartgsm_users');
+  const dbRef = db.ref('smartgsm_v82_db');
+
+  // Global state
+  let currentUser = null;
+  let currentUserData = null;
+  let appData = { sales: {}, repairs: {}, expenses: {} };
+  let currentFilterDate = new Date().toISOString().split('T')[0];
+  let currentFilterMonth = currentFilterDate.substring(0, 7);
+  let currentFilterYear = currentFilterDate.substring(0, 4);
+  let currentViewType = 'daily';
+
+  // Login handler
+  document.getElementById('loginBtn').onclick = () => {
+    const email = document.getElementById('logEmail').value;
+    const pass = document.getElementById('logPass').value;
+    auth.signInWithEmailAndPassword(email, pass).catch(() => {
+        document.getElementById('logError').classList.remove('hidden');
+    });
+  };
+
+  // Auth state listener
+  auth.onAuthStateChanged(user => {
+    if(user) {
+      currentUser = user;
+      usersRef.child(user.uid).once('value').then((snapshot) => {
+        const userData = snapshot.val();
+        if (!userData || userData.role!== 'staff') {
+          window.location.href = "dashboard-admin.html";
+          return;
+        }
+
+        if (userData.trialEndsAt && Date.now() > userData.trialEndsAt) {
+          alert('Your account has expired. Please contact admin.');
+          auth.signOut();
+          return;
+        }
+
+        currentUserData = userData;
+        document.getElementById('shopNameDisplay').innerText = userData.shopName || 'My Shop';
+        document.getElementById('staffNameDisplay').innerText = userData.fullName;
+
+        if (userData.shopIcon) {
+          document.getElementById('sidebarShopIcon').src = userData.shopIcon;
+          document.getElementById('sidebarShopIcon').style.display = 'block';
+        }
+
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('dashboardSection').classList.remove('hidden');
+        document.getElementById('historyFilterDate').value = currentFilterDate;
+        document.getElementById('historyFilterMonth').value = currentFilterMonth;
+        document.getElementById('historyFilterYear').value = currentFilterYear;
+        loadData();
+      });
+    } else {
+      document.getElementById('loginSection').classList.remove('hidden');
+      document.getElementById('dashboardSection').classList.add('hidden');
+      document.getElementById('logEmail').value = '';
+      document.getElementById('logPass').value = '';
+      document.getElementById('logError').classList.add('hidden');
+    }
+  });
+
+  // Logout handler
+  document.getElementById('logoutBtn').onclick = () => auth.signOut();
+  document.getElementById('logoutBtnMobile').onclick = () => auth.signOut();
+
+  // Utility functions
+  const formatPHP = (n) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(n || 0);
+  const getToday = () => new Date().toISOString().split('T')[0];
+  const getTimeNow = () => new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  const autoCap = (s) => s? s.replace(/\b\w/g, l => l.toUpperCase()) : "";
+  const num = v => parseFloat(String(v).replace(/,/g,'')) || 0;
+  const saveData = () => dbRef.set(appData);
+
+  // Load data from Firebase
+  const loadData = () => {
+    dbRef.on('value', (snap) => {
+      const data = snap.val() || {};
+      appData.sales = data.sales || {};
+      appData.repairs = data.repairs || {};
+      appData.expenses = data.expenses || {};
+      updateStats();
+      applyLocalTheme();
+    });
+  };
+
+  // Update dashboard stats - SYNC SA HISTORY FILTER
+  const updateStats = () => {
+    let rev = 0, cap = 0, exp = 0, salesToday = 0, repairsToday = 0;
+
+    let sList = Object.values(appData.sales);
+    let rList = Object.values(appData.repairs);
+    let eList = Object.values(appData.expenses);
+
+    // Filter based sa view type
+    if (currentViewType === 'monthly') {
+      sList = sList.filter(s => s.date && s.date.startsWith(currentFilterMonth));
+      rList = rList.filter(r => r.date && r.date.startsWith(currentFilterMonth));
+      eList = eList.filter(e => e.date && e.date.startsWith(currentFilterMonth));
+      document.getElementById('showingDateText').innerText = `Showing: ${currentFilterMonth}`;
+    } else if (currentViewType === 'yearly') {
+      sList = sList.filter(s => s.date && s.date.startsWith(currentFilterYear));
+      rList = rList.filter(r => r.date && r.date.startsWith(currentFilterYear));
+      eList = eList.filter(e => e.date && e.date.startsWith(currentFilterYear));
+      document.getElementById('showingDateText').innerText = `Showing: ${currentFilterYear}`;
+    } else {
+      sList = sList.filter(s => s.date === currentFilterDate);
+      rList = rList.filter(r => r.date === currentFilterDate);
+      eList = eList.filter(e => e.date === currentFilterDate);
+      document.getElementById('showingDateText').innerText = `Showing: ${currentFilterDate}`;
+    }
+
+    sList.forEach(s => {
+      rev += num(s.price) * parseInt(s.qty);
+      cap += num(s.capital) * parseInt(s.qty);
+      salesToday++;
+    });
+    rList.forEach(r => {
+      rev += num(r.price);
+      cap += num(r.capital);
+      repairsToday++;
+    });
+    eList.forEach(e => { exp += num(e.amount); });
+
+    const netProfit = rev - cap - exp;
+    const profitEl = document.getElementById('totalRevenue');
+
+    document.getElementById('totalRevenue').innerText = formatPHP(rev - cap);
+    document.getElementById('totalExpenses').innerText = formatPHP(exp);
+    document.getElementById('salesCount').innerText = salesToday;
+    document.getElementById('repairCount').innerText = repairsToday;
+
+    renderHistory();
+  };
+
+  // Render history table with Daily/Monthly/Yearly filter
+  const renderHistory = () => {
+    const tbody = document.getElementById('historyTableBody');
+    const viewType = document.getElementById('historyViewType').value;
+    const dateF = document.getElementById('historyFilterDate').value;
+    const monthF = document.getElementById('historyFilterMonth').value;
+    const yearF = document.getElementById('historyFilterYear').value;
+    const typeF = document.getElementById('filterType').value;
+    const statusF = document.getElementById('filterStatus').value;
+    const search = document.getElementById('searchHistory').value.toLowerCase();
+
+    // Update global filter para sa cards
+    currentViewType = viewType;
+    if (viewType === 'monthly') {
+      currentFilterMonth = monthF;
+    } else if (viewType === 'yearly') {
+      currentFilterYear = yearF;
+    } else {
+      currentFilterDate = dateF;
+    }
+
+    let list = [
+...Object.values(appData.sales).map(s => ({...s, type: 'sale'})),
+...Object.values(appData.repairs).map(r => ({...r, type: 'repair'})),
+...Object.values(appData.expenses).map(e => ({...e, type: 'expense'}))
+    ].sort((a,b) => b.timestamp - a.timestamp);
+
+    // Filter by view type
+    if (viewType === 'monthly' && monthF) {
+      list = list.filter(x => x.date && x.date.startsWith(monthF));
+    } else if (viewType === 'yearly' && yearF) {
+      list = list.filter(x => x.date && x.date.startsWith(yearF));
+    } else if (dateF) {
+      list = list.filter(x => x.date === dateF);
+    }
+
+    if(typeF!== 'all') list = list.filter(x => x.type === typeF);
+    if(statusF!== 'all') list = list.filter(x => x.status === statusF);
+    if(search) list = list.filter(x =>
+      (x.model || "").toLowerCase().includes(search) ||
+      (x.brand || "").toLowerCase().includes(search) ||
+      (x.customer || "").toLowerCase().includes(search) ||
+      (x.issue || "").toLowerCase().includes(search) ||
+      (x.reason || "").toLowerCase().includes(search) ||
+      (x.item || "").toLowerCase().includes(search)
+    );
+
+    tbody.innerHTML = list.map(t => {
+      let displayValue = 0;
+      let colorClass = "text-green-400";
+      let fullDetails = '';
+      let statusBadge = '';
+
+      if(t.type === 'expense') {
+          displayValue = num(t.amount);
+          colorClass = "text-red-400";
+          fullDetails = `<div class="font-bold text-sm text-main uppercase">${t.reason || 'Expense'}</div>
+                         <div class="text-xs text-sub">Amount: ${formatPHP(t.amount)}</div>`;
+      } else if(t.type === 'sale') {
+          displayValue = (num(t.price) - num(t.capital)) * (parseInt(t.qty) || 1);
+          const statusClass = t.status === 'Completed'? 'status-done' : t.status === 'Cancelled'? 'bg-red-100 text-red-800' : t.status === 'Reserved'? 'bg-blue-100 text-blue-800' : 'status-pending';
+          statusBadge = `<span class="text-xs font-bold px-2 py-0.5 rounded ${statusClass}">${t.status || 'Completed'}</span>`;
+          fullDetails = `<div class="font-bold text-sm text-main uppercase">${t.item || t.brand + ' ' + t.model}</div>
+                         <div class="text-xs text-sub">Qty: ${t.qty} | Capital: ${formatPHP(t.capital)} | Price: ${formatPHP(t.price)}</div>
+                         <div class="text-xs text-sub">${t.warranty || 'No Warranty'}</div>
+                         <div class="text-xs text-green-400 font-bold">Profit: ${formatPHP(displayValue)}</div>
+                         ${statusBadge}`;
+      } else {
+          displayValue = num(t.price) - num(t.capital);
+          const statusClass = t.status === 'Done'? 'status-done' : t.status === 'Return to Owner'? 'status-return' : 'status-pending';
+          statusBadge = `<span class="text-xs font-bold px-2 py-0.5 rounded ${statusClass}">${t.status || 'Pending'}</span>`;
+          fullDetails = `<div class="font-bold text-sm text-main uppercase">${t.customer}</div>
+                         <div class="text-xs text-sub">${t.brand} ${t.model}</div>
+                         <div class="text-sm font-bold text-amber-400 bg-amber-500/20 px-2 py-1 rounded inline-block my-1">${t.issue}</div>
+                         <div class="text-xs text-sub">Capital: ${formatPHP(t.capital)} | Price: ${formatPHP(t.price)} | ${t.warranty}</div>
+                         ${statusBadge}`;
+      }
+
+      return `
+      <tr class="hover:bg-input transition-colors">
+        <td class="px-4 py-4">
+          <span class="text-xs font-black uppercase px-2 py-1 rounded ${t.type==='sale'?'bg-blue-100 text-blue-600':t.type==='repair'?'bg-orange-100 text-orange-600':'bg-red-100 text-red-600'}">
+            ${t.type}
+          </span>
+        </td>
+        <td class="px-4 py-4">${fullDetails}</td>
+        <td class="px-4 py-4">
+           <div class="text-xs font-mono text-main">${t.date}</div>
+           <div class="text-xs text-blue-500 font-bold">${t.time || '--:--'}</div>
+        </td>
+        <td class="px-4 py-4 text-right font-bold ${colorClass}">${formatPHP(displayValue)}</td>
+      </tr>
+    `}).join('');
+    document.getElementById('emptyHistory').classList.toggle('hidden', list.length > 0);
+    lucide.createIcons();
+
+    // Update cards after filter change
+    updateStats();
+  };
+
+   // Save new sale - LAHAT OPTIONAL
+  document.getElementById('salesForm').onsubmit = (e) => {
+    e.preventDefault();
+    const id = 's' + Date.now();
+    appData.sales[id] = {
+      id, timestamp: Date.now(),
+      date: document.getElementById('salesDate').value || getToday(),
+      time: getTimeNow(),
+      item: autoCap(document.getElementById('salesItem').value) || 'N/A',
+      brand: autoCap(document.getElementById('salesBrand').value) || '',
+      model: autoCap(document.getElementById('salesModel').value) || '',
+      qty: parseInt(document.getElementById('salesQty').value) || 1,
+      capital: num(document.getElementById('salesCapital').value),
+      price: num(document.getElementById('salesPrice').value),
+      status: document.getElementById('saleStatus').value,
+      warranty: document.getElementById('saleWarranty').value
+    };
+    saveData();
+    e.target.reset();
+    document.getElementById('salesDate').value = getToday();
+    document.getElementById('salesQty').value = 1;
+    document.getElementById('saleStatus').value = 'Completed';
+    document.getElementById('saleWarranty').value = 'No Warranty';
+    alert('Sale recorded successfully!');
+  };
+
+  // Save new repair - LAHAT OPTIONAL
+  document.getElementById('repairForm').onsubmit = (e) => {
+    e.preventDefault();
+    const id = 'r' + Date.now();
+    appData.repairs[id] = {
+      id, timestamp: Date.now(),
+      date: document.getElementById('repairDate').value || getToday(),
+      time: getTimeNow(),
+      customer: autoCap(document.getElementById('repairCustomer').value) || 'N/A',
+      status: document.getElementById('repairStatus').value,
+      brand: autoCap(document.getElementById('repairBrand').value) || '',
+      model: autoCap(document.getElementById('repairModel').value) || '',
+      issue: autoCap(document.getElementById('repairIssue').value) || 'N/A',
+      capital: num(document.getElementById('repairCapital').value),
+      price: num(document.getElementById('repairPrice').value),
+      warranty: document.getElementById('repairWarranty').value
+    };
+    saveData();
+    e.target.reset();
+    document.getElementById('repairDate').value = getToday();
+    document.getElementById('repairStatus').value = 'Pending';
+    document.getElementById('repairWarranty').value = 'No Warranty';
+    alert('Repair recorded successfully!');
+  };
+
+  // Save new expense - LAHAT OPTIONAL
+  document.getElementById('expenseForm').onsubmit = (e) => {
+    e.preventDefault();
+    const id = 'e' + Date.now();
+    appData.expenses[id] = {
+      id, timestamp: Date.now(),
+      date: document.getElementById('expDate').value || getToday(),
+      time: getTimeNow(),
+      amount: num(document.getElementById('expAmount').value),
+      reason: autoCap(document.getElementById('expReason').value) || 'N/A'
+    };
+    saveData();
+    e.target.reset();
+    document.getElementById('expDate').value = getToday();
+    alert('Expense recorded successfully!');
+  };
+
+  // Tab switching
+  const switchTab = (tab) => {
+    ['sales', 'repair', 'expense', 'history'].forEach(t => {
+      const content = document.getElementById(t+'Content');
+      const tabBtn = document.querySelector(`[data-tab="${t}"]`);
+
+      content.classList.toggle('active', t === tab);
+
+      if (tabBtn) {
+        tabBtn.classList.toggle('active', t === tab);
+      }
+    });
+
+    document.getElementById('mobileTitle').innerText = document.querySelector(`[data-tab="${tab}"]`).innerText.trim();
+    lucide.createIcons();
+    if(tab === 'history') renderHistory();
+  };
+
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.onclick = () => switchTab(btn.dataset.tab);
+  });
+
+  // Mobile menu
+  document.getElementById('mobileMenuBtn').onclick = () => {
+    document.querySelector('.sidebar').classList.toggle('open');
+  };
+
+  // History filters
+  document.getElementById('historyViewType').onchange = (e) => {
+    const isMonthly = e.target.value === 'monthly';
+    const isYearly = e.target.value === 'yearly';
+    document.getElementById('historyDailyPicker').classList.toggle('hidden', isMonthly || isYearly);
+    document.getElementById('historyMonthlyPicker').classList.toggle('hidden',!isMonthly);
+    document.getElementById('historyYearlyPicker').classList.toggle('hidden',!isYearly);
+    renderHistory();
+  };
+
+  document.getElementById('historyFilterDate').onchange = renderHistory;
+  document.getElementById('historyFilterMonth').onchange = renderHistory;
+  document.getElementById('historyFilterYear').oninput = renderHistory;
+  document.getElementById('filterType').onchange = renderHistory;
+  document.getElementById('filterStatus').onchange = renderHistory;
+  document.getElementById('searchHistory').oninput = renderHistory;
+
+  // Theme toggle
+  const applyLocalTheme = () => {
+    const isDark = localStorage.getItem('gsm_dark') === 'true';
+    document.documentElement.classList.toggle('dark', isDark);
+    document.querySelector('.dark-icon').classList.toggle('hidden', isDark);
+    document.querySelector('.light-icon').classList.toggle('hidden',!isDark);
+  };
+
+  document.getElementById('darkModeToggle').onclick = () => {
+    const current = localStorage.getItem('gsm_dark') === 'true';
+    localStorage.setItem('gsm_dark',!current);
+    applyLocalTheme();
+  };
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    const today = getToday();
+    const thisMonth = today.substring(0, 7);
+    const thisYear = today.substring(0, 4);
+    ['salesDate', 'repairDate', 'expDate', 'historyFilterDate'].forEach(id => {
+        document.getElementById(id).value = today;
+    });
+    document.getElementById('historyFilterMonth').value = thisMonth;
+    document.getElementById('historyFilterYear').value = thisYear;
+    applyLocalTheme();
+    lucide.createIcons();
+  });
+</script>
+</body>
+</html>
