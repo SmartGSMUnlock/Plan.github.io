@@ -28,7 +28,7 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             width: 100%;
-            max-width: 480px;
+            max-width: 600px;
             overflow: hidden;
         }
         .auth-header {
@@ -47,7 +47,7 @@
         .tab-btn.active {
             background: white; color: #111827; border-bottom: 3px solid #667eea;
         }
-        .auth-body { padding: 30px; }
+        .auth-body { padding: 30px; max-height: 75vh; overflow-y: auto; }
         .form-group { margin-bottom: 20px; }
         .form-group label {
             display: block; margin-bottom: 8px; font-weight: 600;
@@ -59,19 +59,27 @@
         }
         .form-group input:focus { outline: none; border-color: #667eea; }
         .plan-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;
         }
         .plan-card {
-            border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px 15px;
-            text-align: center; cursor: pointer; transition: all 0.3s;
+            border: 2px solid #e5e7eb; border-radius: 12px; padding: 18px;
+            text-align: left; cursor: pointer; transition: all 0.3s; position: relative;
         }
         .plan-card:hover { border-color: #667eea; transform: translateY(-3px); }
         .plan-card.selected { border-color: #667eea; background: #eef2ff; }
-        .plan-card h3 { font-size: 18px; color: #111827; margin-bottom: 5px; }
-        .plan-card .price { font-size: 24px; font-weight: 700; color: #667eea; }
-        .plan-card .price span { font-size: 14px; color: #6b7280; }
-        .plan-card ul { list-style: none; margin-top: 10px; font-size: 12px; color: #6b7280; }
-        .plan-card ul li { margin: 4px 0; }
+        .plan-card .badge {
+            position: absolute; top: -8px; right: 10px;
+            background: #10b981; color: white; padding: 3px 10px;
+            border-radius: 20px; font-size: 10px; font-weight: 700;
+        }
+        .plan-card .badge.hot { background: #ef4444; }
+        .plan-card .badge.pro { background: #8b5cf6; }
+        .plan-card h3 { font-size: 16px; color: #111827; margin-bottom: 6px; }
+        .plan-card .price { font-size: 24px; font-weight: 700; color: #667eea; margin-bottom: 8px; }
+        .plan-card .price span { font-size: 12px; color: #6b7280; font-weight: 400; }
+        .plan-card ul { list-style: none; font-size: 12px; color: #4b5563; }
+        .plan-card ul li { margin: 4px 0; padding-left: 18px; position: relative; }
+        .plan-card ul li:before { content: "✓"; position: absolute; left: 0; color: #10b981; font-weight: 700; }
         .btn-primary {
             width: 100%; padding: 14px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -133,6 +141,9 @@
             background: white; padding: 30px; border-radius: 12px;
             width: 90%; max-width: 500px;
         }
+        @media (max-width: 600px) {
+            .plan-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -181,25 +192,51 @@
                     <div class="form-group">
                         <label>Select Plan</label>
                         <div class="plan-grid">
-                            <div class="plan-card" data-plan="basic" onclick="selectPlan('basic')">
-                                <h3>Basic</h3>
-                                <div class="price">Free</div>
+                            <div class="plan-card selected" data-plan="trial_7d" onclick="selectPlan('trial_7d')">
+                                <div class="badge">FREE</div>
+                                <h3>7-Day Trial</h3>
+                                <div class="price">₱0</div>
                                 <ul>
-                                    <li>✓ 50 Products</li>
-                                    <li>✓ 1 Staff Account</li>
-                                    <li>✓ Basic Reports</li>
+                                    <li>50 Products limit</li>
+                                    <li>1 Staff Account</li>
+                                    <li>Basic Reports</li>
+                                    <li>7 Days access</li>
                                 </ul>
                             </div>
-                            <div class="plan-card" data-plan="pro" onclick="selectPlan('pro')">
-                                <h3>Pro</h3>
-                                <div class="price">₱299<span>/mo</span></div>
+                            <div class="plan-card" data-plan="month_1" onclick="selectPlan('month_1')">
+                                <h3>1 Month</h3>
+                                <div class="price">₱299<span>/month</span></div>
                                 <ul>
-                                    <li>✓ Unlimited Products</li>
-                                    <li>✓ 5 Staff Accounts</li>
-                                    <li>✓ Advanced Analytics</li>
+                                    <li>Unlimited Products</li>
+                                    <li>3 Staff Accounts</li>
+                                    <li>Advanced Analytics</li>
+                                    <li>Priority Support</li>
                                 </ul>
                             </div>
-                        <input type="hidden" id="selectedPlan" value="basic">
+                            <div class="plan-card" data-plan="year_1" onclick="selectPlan('year_1')">
+                                <div class="badge hot">BEST</div>
+                                <h3>1 Year</h3>
+                                <div class="price">₱2,999<span>/year</span></div>
+                                <ul>
+                                    <li>Unlimited Products</li>
+                                    <li>5 Staff Accounts</li>
+                                    <li>Advanced Analytics</li>
+                                    <li>Save ₱589</li>
+                                </ul>
+                            </div>
+                            <div class="plan-card" data-plan="lifetime" onclick="selectPlan('lifetime')">
+                                <div class="badge pro">PRO</div>
+                                <h3>Lifetime</h3>
+                                <div class="price">₱6,999<span>/once</span></div>
+                                <ul>
+                                    <li>Unlimited Products</li>
+                                    <li>10 Staff Accounts</li>
+                                    <li>All Features</li>
+                                    <li>Lifetime Updates</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <input type="hidden" id="selectedPlan" value="trial_7d">
                     </div>
                     <button type="submit" class="btn-primary" id="signupBtn">Create Account</button>
                 </form>
@@ -233,7 +270,7 @@
                 </div>
                 <div class="stat-card">
                     <h3>Active Plan</h3>
-                    <div class="value" id="activePlan" style="font-size: 24px;">Basic</div>
+                    <div class="value" id="activePlan" style="font-size: 20px;">Trial</div>
                 </div>
             </div>
 
@@ -295,13 +332,13 @@
         import { getDatabase, ref, set, get, push, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
         const firebaseConfig = {
-            apiKey: "AIzaSyCwTHr8KXyoOXjazi7yYb1sW-tU1qs1lHU",
-            authDomain: "salesinventory-c83d2.firebaseapp.com",
-            databaseURL: "https://salesinventory-c83d2-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "salesinventory-c83d2",
-            storageBucket: "salesinventory-c83d2.firebasestorage.app",
-            messagingSenderId: "820712542228",
-            appId: "1:820712542228:web:d2dced458ab476c3068ee8"
+          apiKey: "AIzaSyB_5x-Zr2RkoFjPVo3z7lFCLfgmWVxWyI4",
+          authDomain: "sales-2de80.firebaseapp.com",
+          databaseURL: "https://sales-2de80-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "sales-2de80",
+          storageBucket: "sales-2de80.firebasestorage.app",
+          messagingSenderId: "472235626650",
+          appId: "1:472235626650:web:8d65763dd5c113c3dacf23"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -338,9 +375,20 @@
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                await set(ref(db, 'users/' + userCredential.user.uid), {
-                    name, email, plan, createdAt: new Date().toISOString()
-                });
+                let planData = { name, email, plan, role: 'user', createdAt: new Date().toISOString() };
+                
+                // Set expiry dates
+                if (plan === 'trial_7d') {
+                    planData.trialEndsAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
+                } else if (plan === 'month_1') {
+                    planData.planEndsAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
+                } else if (plan === 'year_1') {
+                    planData.planEndsAt = Date.now() + 365 * 24 * 60 * 60 * 1000;
+                } else if (plan === 'lifetime') {
+                    planData.planEndsAt = 9999999999999;
+                }
+                
+                await set(ref(db, 'users/' + userCredential.user.uid), planData);
                 showSuccess('Account created successfully!');
             } catch (error) {
                 showError(error.message);
@@ -374,8 +422,16 @@
                 currentUser = user;
                 const userSnap = await get(ref(db, 'users/' + user.uid));
                 const userData = userSnap.val();
+                
+                const planNames = {
+                    'trial_7d': '7-Day Trial',
+                    'month_1': '1 Month',
+                    'year_1': '1 Year',
+                    'lifetime': 'Lifetime'
+                };
+                
                 document.getElementById('userInfo').textContent = userData?.name || user.email;
-                document.getElementById('activePlan').textContent = userData?.plan === 'pro' ? 'Pro' : 'Basic';
+                document.getElementById('activePlan').textContent = planNames[userData?.plan] || 'Trial';
                 document.getElementById('authWrapper').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'block';
                 loadInventory();
@@ -420,6 +476,31 @@
 
         document.getElementById('addProductForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            const userSnap = await get(ref(db, 'users/' + currentUser.uid));
+            const userData = userSnap.val();
+            const inventorySnap = await get(ref(db, 'inventory/' + currentUser.uid));
+            const currentCount = inventorySnap.exists() ? Object.keys(inventorySnap.val()).length : 0;
+            
+            // Check limits
+            if (userData.plan === 'trial_7d' && currentCount >= 50) {
+                alert('Trial limit reached! Max 50 products. Upgrade to continue.');
+                closeModal();
+                return;
+            }
+            
+            const now = Date.now();
+            if (userData.plan === 'trial_7d' && userData.trialEndsAt < now) {
+                alert('Your 7-day trial has expired. Please upgrade.');
+                closeModal();
+                return;
+            }
+            if ((userData.plan === 'month_1' || userData.plan === 'year_1') && userData.planEndsAt < now) {
+                alert('Your plan has expired. Please renew.');
+                closeModal();
+                return;
+            }
+            
             const product = {
                 name: document.getElementById('productName').value,
                 category: document.getElementById('productCategory').value,
@@ -453,7 +534,7 @@
             document.getElementById('successMsg').style.display = 'none';
         }
 
-        selectPlan('basic');
+        selectPlan('trial_7d');
     </script>
 </body>
 </html>
