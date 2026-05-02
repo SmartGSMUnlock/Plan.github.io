@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>App Launcher Hub</title>
+        <style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text: #e2e8f0;
+    --accent: #3b82f6;
+    --hover: #2563eb;
+  }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+    line-height: 1.6;
+  }
+  .container { max-width: 800px; margin: 0 auto; }
+  h1 { 
+    text-align: center; 
+    margin-bottom: 24px;
+    font-size: clamp(1.5rem, 5vw, 2.2rem);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .app-card {
+    background: var(--card);
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 16px;
+    transition: 0.2s;
+  }
+  .app-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .app-card a {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .app-card a:hover { color: var(--accent); }
+  .icon { font-size: 1.4rem; }
+  .note {
+    margin-top: 30px;
+    padding: 16px;
+    background: #1e293b;
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+</style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Android App Shortcuts</h1>
+
+            <div class="grid">
+                <div class="app-card">
+                    <a
+                        href="intent://de.szalkowski.activitylauncher/#Intent;scheme=android-app;end"
+                        target="_blank" rel="noopener">
+                        <span class="icon">🚀</span> Open Activity
+                        <strong>Launcher</strong>
+                    </a>
+                </div>
+
+                <div class="app-card">
+                    <a
+                        href="intent://com.android.settings/#Intent;scheme=android-app;end"
+                        target="_blank" rel="noopener">
+                        <span class="icon">⚙️</span> Open Settings
+                    </a>
+                </div>
+
+                <div class="app-card">
+                    <a
+                        href="intent://com.sec.android.app.popupcalculator/#Intent;scheme=android-app;end"
+                        target="_blank" rel="noopener">
+                        <span class="icon">🧮</span> Open Calculator
+                    </a>
+                </div>
+                <div id="comp-lg167u591"
+                    class="v__F4U comp-lg167u591 wixui-image">
+                    <h3 class="MVY5Lo" data-testid="linkElement"><a
+                            href="intent://de.szalkowski.activitylauncher/#Intent;scheme=android-app;end"
+                            target="_blank" rel="noopener"><strong><img
+                                    loading="lazy" decoding="async"
+                                    src="https://static.wixstatic.com/media/c1f87e_aadee5aa06564c4cbf316412f1f89487~mv2.jpg/v1/fill/w_40,h_40,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/unnamed%20(2)_edited.jpg"
+                                    srcset="https://static.wixstatic.com/media/c1f87e_aadee5aa06564c4cbf316412f1f89487~mv2.jpg/v1/fill/w_40,h_40,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/unnamed%20(2)_edited.jpg 1x, https://static.wixstatic.com/media/c1f87e_aadee5aa06564c4cbf316412f1f89487~mv2.jpg/v1/fill/w_80,h_80,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/unnamed%20(2)_edited.jpg 2x"
+                                    alt="unnamed (2)_edited.jpg" width="40"
+                                    height="40"></strong></a><a
+                            href="intent://de.szalkowski.activitylauncher/#Intent;scheme=android-app;end"
+                            target="_blank" rel="noopener">Open
+                            Activity&nbsp;<strong>Launcher</strong></a></h3>
+                </div>
+
+                <!-- Dagdag ka dito ng sarili mong <div class="app-card">...</div> -->
+
+            </div>
+
+            <div class="note">
+                Note: Yung <code>intent://</code> links gagana lang sa Android
+                Chrome/Browser kung installed yung app. Sa PC hindi siya gagana.
+            </div>
+        </div>
+    </body>
+</html>
